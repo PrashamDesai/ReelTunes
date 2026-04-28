@@ -6,7 +6,9 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import ResultsTable, { type ResultItem } from "./ResultsTable";
 import Spinner from "./Spinner";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://a19f-202-131-110-138.ngrok-free.app;
 
 const PIPELINE_STEPS = {
   single: [

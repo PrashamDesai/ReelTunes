@@ -1,6 +1,11 @@
 # Reel Song Extractor
 
-Reel Song Extractor is a local MVP for turning Instagram reel links or collection-style URLs into detected songs and downloadable MP3 files.
+Reel Song Extractor is a web app for turning Instagram reel links or collection-style URLs into detected songs and downloadable MP3 files.
+
+Live deployment:
+
+- Frontend: https://reeltunes.onrender.com
+- Backend API: https://a19f-202-131-110-138.ngrok-free.app
 
 - Frontend: Next.js App Router + Tailwind CSS
 - Backend: FastAPI + yt-dlp + ffmpeg + ShazamIO
@@ -58,7 +63,7 @@ pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
 
-Backend runs on `http://localhost:8000`.
+Backend runs on `http://localhost:8000` for local development.
 
 ## Frontend setup
 
@@ -67,6 +72,12 @@ cd frontend
 copy .env.local.example .env.local
 npm install
 npm run dev
+```
+
+Set `NEXT_PUBLIC_API_URL` in `.env.local` to your backend URL. For the deployed backend, use:
+
+```bash
+NEXT_PUBLIC_API_URL=http://b140-202-131-110-138.ngrok-free.app
 ```
 
 If you are not on Windows, replace `copy` with:
