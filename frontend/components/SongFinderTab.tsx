@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 
 import ResultsTable, { type ResultItem } from "./ResultsTable";
 import Spinner from "./Spinner";
+import { processUrl } from "@/lib/processUrl";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -38,21 +39,6 @@ async function readApiError(response: Response) {
   return `Request failed with status ${response.status}.`;
 }
 
-async function processUrl(mode: Mode, url: string): Promise<ResultItem[]> {
-  const endpoint = mode === "single" ? "/process-single" : "/process-batch";
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url }),
-  });
-
-  if (!response.ok) {
-    throw new Error(await readApiError(response));
-  }
-
-  const payload = await response.json();
-  return Array.isArray(payload) ? payload : [payload];
-}
 
 type SongFinderTabProps = {
   sharedUrl?: string;
