@@ -2,6 +2,7 @@
   "name": "ReelTunes",
   "short_name": "ReelTunes",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#060816",
   "theme_color": "#060816",
@@ -20,7 +21,7 @@
   "share_target": {
     "action": "/share-target",
     "method": "POST",
-    "enctype": "multipart/form-data",
+    "enctype": "application/x-www-form-urlencoded",
     "params": {
       "text": "text",
       "url": "url"

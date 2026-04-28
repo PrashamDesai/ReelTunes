@@ -88,6 +88,13 @@ cp .env.local.example .env.local
 
 Frontend runs on `http://localhost:3000`.
 
+Testing the Share Target
+
+- Install the PWA on an Android device (Chrome) or another Chromium-based browser that supports Web Share Target.
+- After updating `manifest.json`, you must reinstall the app for changes to take effect: uninstall the existing PWA, then visit the site and choose "Install" / "Add to Home screen" again.
+- To test: open a reel (or a browser with the reel URL), tap Share → choose "ReelTunes" (the installed app). The app should open and prefill the shared link.
+- Note: the share target is only available on platforms/browsers that support the Web Share Target API (primarily Android Chromium browsers).
+
 ## API endpoints
 
 ### `POST /process-single`
