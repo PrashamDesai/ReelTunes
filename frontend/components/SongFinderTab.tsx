@@ -8,7 +8,7 @@ import Spinner from "./Spinner";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
-  "https://a19f-202-131-110-138.ngrok-free.app;
+  "https://a19f-202-131-110-138.ngrok-free.app";
 
 const PIPELINE_STEPS = {
   single: [
