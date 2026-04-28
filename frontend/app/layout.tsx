@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import "./globals.css";
+import Toast from "@/components/Toast";
 
 export const metadata: Metadata = {
   title: "ReelTunes — Save songs from any short video",
@@ -30,6 +31,7 @@ export default function RootLayout({
         <div className="background-orb background-orb-right" aria-hidden />
         <div className="background-orb background-orb-bottom" aria-hidden />
         <ServiceWorkerRegistration />
+        <Toast />
         {children}
       </body>
     </html>

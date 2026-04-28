@@ -212,6 +212,11 @@ export default function QuickAudioTab() {
                 href={downloadUrl}
                 className="primary-button"
                 download
+                onClick={() =>
+                  window.dispatchEvent(
+                    new CustomEvent("reeltunes-toast", { detail: { message: "Download started" } }),
+                  )
+                }
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="M12 3v12" />

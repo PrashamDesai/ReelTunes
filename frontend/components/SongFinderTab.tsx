@@ -166,6 +166,9 @@ export default function SongFinderTab({
     });
     const link = document.createElement("a");
     link.href = `${API_URL}/results/archive?${params.toString()}`;
+    window.dispatchEvent(
+      new CustomEvent("reeltunes-toast", { detail: { message: "Download started" } }),
+    );
     link.click();
   }
 

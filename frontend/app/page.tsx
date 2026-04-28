@@ -45,7 +45,7 @@ export default function Page({ searchParams }: HomePageProps) {
 
         <p className="mt-5 max-w-2xl text-base leading-7 text-surface-100/65 sm:text-lg">
           Paste a link from Instagram, YouTube, Facebook, Pinterest, Reddit, and more.
-          Get the raw audio or the full original track — we do the rest.
+          We do the rest.
         </p>
       </section>
 
