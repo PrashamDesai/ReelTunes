@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import PwaInstallPrompt from "@/components/PwaInstallPrompt";
 import "./globals.css";
 import Toast from "@/components/Toast";
 
@@ -31,6 +32,7 @@ export default function RootLayout({
         <div className="background-orb background-orb-right" aria-hidden />
         <div className="background-orb background-orb-bottom" aria-hidden />
         <ServiceWorkerRegistration />
+        <PwaInstallPrompt />
         <Toast />
         {children}
       </body>

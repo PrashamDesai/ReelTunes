@@ -18,12 +18,6 @@ const PIPELINE_STEPS = {
     "Identifying the song",
     "Fetching the full track",
   ],
-  collection: [
-    "Opening the collection",
-    "Finding every video",
-    "Listening to each one",
-    "Saving every song we find",
-  ],
 } as const;
 
 type Mode = keyof typeof PIPELINE_STEPS;
@@ -47,12 +41,9 @@ type SongFinderTabProps = {
 export default function SongFinderTab({
   sharedUrl = "",
 }: SongFinderTabProps) {
-  const [mode, setMode] = useState<Mode>("single");
   const [singleUrl, setSingleUrl] = useState(sharedUrl);
-  const [collectionUrl, setCollectionUrl] = useState("");
   const [results, setResults] = useState<ResultItem[]>([]);
   const [phase, setPhase] = useState<Phase>("idle");
-  const [activeMode, setActiveMode] = useState<Mode>("single");
   const [error, setError] = useState<string | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [, startTransition] = useTransition();
@@ -65,11 +56,10 @@ export default function SongFinderTab({
       setStepIndex((current) => current + 1);
     }, 1500);
     return () => window.clearInterval(interval);
-  }, [phase, activeMode]);
+  }, [phase]);
 
   useEffect(() => {
     if (!sharedUrl) return;
-    setMode("single");
     setSingleUrl(sharedUrl);
 
     const frame = window.requestAnimationFrame(() => {
@@ -82,24 +72,23 @@ export default function SongFinderTab({
 
   const foundResults = results.filter((item) => item.status === "found" && item.filename);
   const failedResults = results.filter((item) => item.status !== "found");
-  const steps = PIPELINE_STEPS[activeMode];
+  const steps = PIPELINE_STEPS.single;
   const currentStep = steps[Math.min(stepIndex, steps.length - 1)];
 
   async function runPipeline() {
-    const source = (mode === "single" ? singleUrl : collectionUrl).trim();
+    const source = singleUrl.trim();
     if (!source) {
       setPhase("error");
       setError("Paste a video link to start.");
       return;
     }
 
-    setActiveMode(mode);
     setPhase("loading");
     setError(null);
     setResults([]);
 
     try {
-      const next = await processUrl(mode, source);
+      const next = await processUrl("single", source);
       startTransition(() => {
         setResults(next);
         setPhase("done");
@@ -118,7 +107,6 @@ export default function SongFinderTab({
     if (!failedResults.length) return;
     setPhase("loading");
     setError(null);
-    setActiveMode("collection");
 
     const retried = await Promise.all(
       failedResults.map(async (item) => {
@@ -159,7 +147,6 @@ export default function SongFinderTab({
   }
 
   const isLoading = phase === "loading";
-  const activeUrl = mode === "single" ? singleUrl : collectionUrl;
 
   return (
     <div className="space-y-6">
@@ -182,66 +169,25 @@ export default function SongFinderTab({
           </div>
         </div>
 
-        <div
-          className="mt-6 inline-flex w-full items-center gap-1 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-1"
-          role="tablist"
-          aria-label="Source type"
-        >
-          {(["single", "collection"] as const).map((option) => {
-            const isActive = option === mode;
-            return (
-              <button
-                key={option}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                onClick={() => setMode(option)}
-                className={`relative flex-1 rounded-xl px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition ${
-                  isActive ? "text-white" : "text-surface-100/55 hover:text-white"
-                }`}
-              >
-                {isActive && (
-                  <motion.span
-                    layoutId="finder-mode-glow"
-                    transition={{ type: "spring", stiffness: 360, damping: 30 }}
-                    className="absolute inset-0 -z-0 rounded-xl bg-gradient-to-br from-violet-500/30 to-pink-500/25 ring-1 ring-violet-300/25"
-                  />
-                )}
-                <span className="relative">
-                  {option === "single" ? "Single Video" : "Collection"}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
         <div className="mt-5 space-y-3">
           <label className="block text-[11px] font-semibold uppercase tracking-[0.22em] text-surface-100/50">
-            {mode === "single" ? "Video link" : "Collection or saved-folder link"}
+            Video link
           </label>
           <AnimatePresence mode="wait">
             <motion.input
-              key={mode}
+              key="single"
               ref={inputRef}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18 }}
-              value={activeUrl}
-              onChange={(event) =>
-                mode === "single"
-                  ? setSingleUrl(event.target.value)
-                  : setCollectionUrl(event.target.value)
-              }
+              value={singleUrl}
+              onChange={(event) => setSingleUrl(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") void runPipeline();
               }}
               className="input-shell"
-              placeholder={
-                mode === "single"
-                  ? "https://www.instagram.com/reel/... or https://youtube.com/shorts/..."
-                  : "https://www.instagram.com/<user>/saved/..."
-              }
+              placeholder="https://www.instagram.com/reel/... or https://youtube.com/shorts/..."
               autoComplete="off"
               spellCheck={false}
             />
@@ -268,7 +214,7 @@ export default function SongFinderTab({
                   <circle cx="6" cy="18" r="3" />
                   <circle cx="18" cy="16" r="3" />
                 </svg>
-                {mode === "single" ? "Find this song" : "Process collection"}
+                Find this song
 
               </>
             )}

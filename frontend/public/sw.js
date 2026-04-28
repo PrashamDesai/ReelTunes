@@ -22,6 +22,12 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
+  // Allow share-target POST to pass through without caching
+  if (event.request.method === "POST" && event.request.url.includes("/share-target")) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   if (event.request.method !== "GET") return;
 
   if (event.request.mode === "navigate") {

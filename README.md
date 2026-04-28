@@ -88,13 +88,54 @@ cp .env.local.example .env.local
 
 Frontend runs on `http://localhost:3000`.
 
-Testing the Share Target
+## Mobile Web Share Target Setup
+
+ReelTunes supports sharing directly from Instagram and other apps on Android and iOS!
+
+### Installation Instructions
+
+#### Android (Chrome, Edge, Samsung Internet)
+
+1. Visit https://reeltunes.onrender.com
+2. Look for an install prompt at the bottom of the screen (or tap the menu → "Install app")
+3. Tap **Install** and confirm
+4. The app will be added to your home screen
+
+#### iOS (Safari)
+
+1. Visit https://reeltunes.onrender.com in Safari
+2. Tap the Share button (box with arrow)
+3. Scroll down and tap **Add to Home Screen**
+4. Enter the name and tap **Add**
+
+### Using the Share Feature
+
+Once installed:
+
+1. **Android**: Open a reel or video link in Instagram, tap Share → Select ReelTunes
+2. **iOS**: Open a reel or video link in Instagram, tap Share → Scroll and tap ReelTunes
+3. The app will open and automatically:
+   - Switch to "Find Original Song" mode
+   - Prefill the shared link
+   - Begin processing immediately
+
+### Troubleshooting
+
+- **App won't appear in share menu**: The app must be installed (added to home screen) first. Install the app and try again.
+- **Install prompt not showing**: You may have dismissed it. Try visiting on a fresh browser tab or clearing browser data.
+- **Share isn't working**: 
+  - Ensure you're installing from https://reeltunes.onrender.com (not localhost)
+  - Uninstall the old PWA and reinstall if you previously installed from localhost
+  - Check that your browser supports Web Share Target API (Android Chrome/Edge/Samsung Internet)
+  - iOS support requires iOS 13.2+ with Safari
+
+### Testing the Share Target
 
 - **Important**: Install the PWA from the **deployed URL** (https://reeltunes.onrender.com), not from localhost. The app will remember which origin it was installed from.
 - If you previously installed from localhost, you must uninstall the PWA first, then visit the deployed URL and install again.
 - After updating `manifest.json`, reinstall the app: uninstall the existing PWA, then visit the site and choose "Install" / "Add to Home screen" again.
 - To test: open a reel (or a browser with the reel URL), tap Share → choose "ReelTunes" (the installed app). The app should open, automatically switch to "Find Original Song" (single video mode), and prefill the shared reel link.
-- Note: the share target is only available on platforms/browsers that support the Web Share Target API (primarily Android Chromium browsers).
+- Note: the share target is only available on platforms/browsers that support the Web Share Target API (primarily Android Chromium browsers, iOS 13.2+ Safari).
 
 ## API endpoints
 

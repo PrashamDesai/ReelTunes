@@ -4,8 +4,27 @@ import { useState } from "react";
 import ResultsTable, { type ResultItem } from "./ResultsTable";
 import { processUrl } from "@/lib/processUrl";
 
-// Pattern to extract Instagram post URLs - matches /p/[ID]/ format
-const INSTAGRAM_POST_PATTERN = /https:\/\/www\.instagram\.com\/p\/[a-zA-Z0-9_-]+\//g;
+// Accept both post and reel links, with or without www.
+const INSTAGRAM_LINK_PATTERN =
+  /https?:\/\/(?:www\.)?instagram\.com\/(?:p|reel|reels)\/[a-zA-Z0-9_-]+(?:\/?[^\s\t]*)?/gi;
+
+function normalizeInstagramLink(rawUrl: string) {
+  try {
+    const parsed = new URL(rawUrl.trim());
+    const segments = parsed.pathname.split("/").filter(Boolean);
+
+    if (segments.length < 2) return "";
+
+    const kind = segments[0]?.toLowerCase();
+    const id = segments[1];
+
+    if (!["p", "reel", "reels"].includes(kind) || !id) return "";
+
+    return `https://www.instagram.com/${kind}/${id}/`;
+  } catch {
+    return "";
+  }
+}
 
 export default function CollectionUploader() {
   const [results, setResults] = useState<ResultItem[]>([]);
@@ -28,20 +47,18 @@ export default function CollectionUploader() {
     const text = await file.text();
     const lines = text.split(/\r?\n/);
 
-    // Parse tab-separated format and extract Instagram post URLs
+    // Parse tab-separated format and extract Instagram post/reel URLs.
     const extracted: string[] = [];
     for (const line of lines) {
       const cols = line.split("\t");
       for (const col of cols) {
         const trimmed = col.trim();
-        // Match Instagram post URLs
-        const matches = trimmed.match(INSTAGRAM_POST_PATTERN);
+        const matches = trimmed.match(INSTAGRAM_LINK_PATTERN);
         if (matches) {
           for (const match of matches) {
-            // Extract the base URL without trailing slash and query params
-            const cleanUrl = match.split("?")[0].replace(/\/$/, "");
-            if (!extracted.includes(cleanUrl)) {
-              extracted.push(cleanUrl);
+            const normalized = normalizeInstagramLink(match);
+            if (normalized && !extracted.includes(normalized)) {
+              extracted.push(normalized);
             }
           }
         }
