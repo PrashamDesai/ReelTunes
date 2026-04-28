@@ -160,7 +160,7 @@ export default function ResultsTable({
                       window.dispatchEvent(
                         new CustomEvent("reeltunes-toast", { detail: { message: "Download started" } }),
                       );
-                      triggerDownload(downloadUrl, result.filename);
+                      void triggerDownload(downloadUrl, result.filename);
                     }}
                     className="table-link"
                     disabled={!downloadUrl}

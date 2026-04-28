@@ -167,7 +167,7 @@ export default function CollectionUploader() {
     window.dispatchEvent(
       new CustomEvent("reeltunes-toast", { detail: { message: "Download started" } }),
     );
-    triggerDownload(`${apiUrl}/results/archive?${params.toString()}`, "reeltunes-collection.zip");
+    void triggerDownload(`${apiUrl}/results/archive?${params.toString()}`, "reeltunes-collection.zip");
   }
 
   return (

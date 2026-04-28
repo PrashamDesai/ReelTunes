@@ -7,11 +7,45 @@ export function isIOSDevice() {
   );
 }
 
-export function triggerDownload(url: string, filename?: string | null) {
+function toDownloadFilename(filename?: string | null, fallback = "reeltunes-download.mp3") {
+  return filename?.trim() || fallback;
+}
+
+async function shareBlob(file: File) {
+  if (typeof navigator !== "undefined" && typeof navigator.share === "function" && navigator.canShare?.({ files: [file] })) {
+    await navigator.share({
+      files: [file],
+      title: file.name,
+      text: "Downloaded from ReelTunes",
+    });
+    return true;
+  }
+
+  return false;
+}
+
+export async function triggerDownload(url: string, filename?: string | null) {
   if (typeof document === "undefined" || typeof window === "undefined") return;
 
   if (isIOSDevice()) {
-    window.open(url, "_blank", "noopener,noreferrer");
+    const response = await fetch(url, { credentials: "include" });
+    if (!response.ok) {
+      window.open(url, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    const blob = await response.blob();
+    const file = new File([blob], toDownloadFilename(filename), {
+      type: blob.type || "audio/mpeg",
+    });
+
+    if (await shareBlob(file)) {
+      return;
+    }
+
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl, "_blank", "noopener,noreferrer");
+    window.setTimeout(() => URL.revokeObjectURL(blobUrl), 30_000);
     return;
   }
 
