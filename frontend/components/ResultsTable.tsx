@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { shareContent, triggerDownload } from "@/lib/mobileActions";
 
 export type ResultItem = {
   url: string;
@@ -36,9 +37,13 @@ const rowVariants = {
 export default function ResultsTable({
   results,
   apiUrl,
+  selectedUrls,
+  onToggleSelect,
 }: {
   results: ResultItem[];
   apiUrl: string;
+  selectedUrls?: Set<string>;
+  onToggleSelect?: (url: string) => void;
 }) {
   if (!results.length) {
     return (
@@ -60,6 +65,8 @@ export default function ResultsTable({
           const downloadUrl = resolveApiUrl(apiUrl, result.download_url);
           const youtubeUrl = resolveApiUrl(apiUrl, result.youtube_url);
           const isFound = result.status === "found";
+          const isChecked = selectedUrls?.has(result.url) ?? false;
+          const selectionEnabled = Boolean(onToggleSelect) && isFound;
 
           return (
             <motion.li
@@ -81,6 +88,19 @@ export default function ResultsTable({
 
               <div className="flex flex-col gap-4 pl-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-start gap-3.5">
+                  {onToggleSelect && (
+                    <label className="mt-1 flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/[0.09] bg-white/[0.04] transition hover:bg-white/[0.07]">
+                      <input
+                        type="checkbox"
+                        checked={selectionEnabled ? isChecked : false}
+                        disabled={!selectionEnabled}
+                        onChange={() => onToggleSelect(result.url)}
+                        className="h-4 w-4 accent-emerald-500"
+                        aria-label={`Select ${result.title || result.url}`}
+                      />
+                    </label>
+                  )}
+
                   <div
                     className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
                       isFound
@@ -133,16 +153,17 @@ export default function ResultsTable({
                 </div>
 
                 <div className="flex flex-wrap gap-2 sm:flex-nowrap">
-                  <a
-                    href={downloadUrl || undefined}
-                    className="table-link"
-                    aria-disabled={!downloadUrl}
-                    download
-                    onClick={() =>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!downloadUrl) return;
                       window.dispatchEvent(
                         new CustomEvent("reeltunes-toast", { detail: { message: "Download started" } }),
-                      )
-                    }
+                      );
+                      triggerDownload(downloadUrl, result.filename);
+                    }}
+                    className="table-link"
+                    disabled={!downloadUrl}
                   >
                     <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                       <path d="M12 3v12" />
@@ -150,7 +171,29 @@ export default function ResultsTable({
                       <path d="M5 21h14" />
                     </svg>
                     MP3
-                  </a>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void shareContent({
+                        title: result.title || "ReelTunes song",
+                        text: result.artist ? `${result.title || "Song"} by ${result.artist}` : (result.title || "ReelTunes song"),
+                        url: result.url,
+                      }).catch(() => {
+                        window.dispatchEvent(
+                          new CustomEvent("reeltunes-toast", { detail: { message: "Copy link ready to share" } }),
+                        );
+                      });
+                    }}
+                    className="table-link"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M4 12v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8" />
+                      <path d="m8 8 4-4 4 4" />
+                      <path d="M12 4v11" />
+                    </svg>
+                    Share
+                  </button>
                   <a
                     href={youtubeUrl || undefined}
                     target="_blank"

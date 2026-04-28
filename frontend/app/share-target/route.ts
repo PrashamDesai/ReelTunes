@@ -64,7 +64,7 @@ function redirectHome(request: Request, sharedUrl?: string) {
 
   const destination = new URL("/?mode=song", origin);
   if (sharedUrl) {
-    destination.searchParams.set("shared", encodeURIComponent(sharedUrl));
+    destination.searchParams.set("shared", sharedUrl);
   }
 
   return NextResponse.redirect(destination, { status: 303 });

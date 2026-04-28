@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ResultsTable, { type ResultItem } from "./ResultsTable";
 import { processUrl } from "@/lib/processUrl";
+import { triggerDownload } from "@/lib/mobileActions";
 
 // Accept both post and reel links, with or without www.
 const INSTAGRAM_LINK_PATTERN =
@@ -29,6 +30,7 @@ function normalizeInstagramLink(rawUrl: string) {
 export default function CollectionUploader() {
   const [results, setResults] = useState<ResultItem[]>([]);
   const [filteredLinks, setFilteredLinks] = useState<string[]>([]);
+  const [selectedUrls, setSelectedUrls] = useState<Set<string>>(new Set());
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [total, setTotal] = useState(0);
@@ -41,6 +43,7 @@ export default function CollectionUploader() {
     setError(null);
     setResults([]);
     setFilteredLinks([]);
+    setSelectedUrls(new Set());
     setInvalidCount(0);
     setFileName(file.name);
 
@@ -82,35 +85,89 @@ export default function CollectionUploader() {
 
     setProcessing(true);
     setResults([]);
+    setSelectedUrls(new Set());
     setProgress(0);
     setTotal(filteredLinks.length);
     setError(null);
+
+    const nextResults: ResultItem[] = [];
 
     for (let i = 0; i < filteredLinks.length; i++) {
       const url = filteredLinks[i];
       try {
         const [res] = await processUrl("single", url);
-        setResults((prev) => [...prev, res]);
+        nextResults.push(res);
       } catch (e) {
-        setResults((prev) => [
-          ...prev,
-          {
-            url,
-            status: "not_found",
-            title: null,
-            artist: null,
-            query: null,
-            filename: null,
-            download_url: null,
-            youtube_url: null,
-            error: (e as Error)?.message ?? String(e),
-          },
-        ]);
+        nextResults.push({
+          url,
+          status: "not_found",
+          title: null,
+          artist: null,
+          query: null,
+          filename: null,
+          download_url: null,
+          youtube_url: null,
+          error: (e as Error)?.message ?? String(e),
+        });
       }
+      setResults([...nextResults]);
       setProgress(i + 1);
     }
 
+    setSelectedUrls(
+      new Set(
+        nextResults
+          .filter((result) => result.status === "found" && result.filename)
+          .map((result) => result.url),
+      ),
+    );
+
     setProcessing(false);
+  }
+
+  const foundResults = useMemo(
+    () => results.filter((result) => result.status === "found" && result.filename),
+    [results],
+  );
+
+  const checkedResults = useMemo(
+    () => foundResults.filter((result) => selectedUrls.has(result.url)),
+    [foundResults, selectedUrls],
+  );
+
+  function toggleResult(url: string) {
+    setSelectedUrls((current) => {
+      const next = new Set(current);
+      if (next.has(url)) {
+        next.delete(url);
+      } else {
+        next.add(url);
+      }
+      return next;
+    });
+  }
+
+  function selectAllFound() {
+    setSelectedUrls(new Set(foundResults.map((result) => result.url)));
+  }
+
+  function clearSelection() {
+    setSelectedUrls(new Set());
+  }
+
+  function downloadSelected() {
+    if (!checkedResults.length) return;
+
+    const params = new URLSearchParams();
+    checkedResults.forEach((item) => {
+      if (item.filename) params.append("file", item.filename);
+    });
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://a19f-202-131-110-138.ngrok-free.app";
+    window.dispatchEvent(
+      new CustomEvent("reeltunes-toast", { detail: { message: "Download started" } }),
+    );
+    triggerDownload(`${apiUrl}/results/archive?${params.toString()}`, "reeltunes-collection.zip");
   }
 
   return (
@@ -189,10 +246,46 @@ export default function CollectionUploader() {
 
       {/* Results */}
       {results.length > 0 && (
-        <div>
+        <div className="space-y-3">
+          <div className="panel p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-white">Download checked songs</p>
+              <p className="text-xs text-surface-100/65">
+                {checkedResults.length} of {foundResults.length} found songs selected
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={selectAllFound}
+                className="px-3 py-2 text-sm bg-surface-700 hover:bg-surface-600 rounded text-white transition"
+                disabled={!foundResults.length}
+              >
+                Select all
+              </button>
+              <button
+                type="button"
+                onClick={clearSelection}
+                className="px-3 py-2 text-sm bg-surface-700 hover:bg-surface-600 rounded text-white transition"
+                disabled={!foundResults.length}
+              >
+                Clear all
+              </button>
+              <button
+                type="button"
+                onClick={downloadSelected}
+                className="px-4 py-2 text-sm bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed rounded text-white font-semibold transition"
+                disabled={!checkedResults.length}
+              >
+                Download checked ({checkedResults.length})
+              </button>
+            </div>
+          </div>
           <ResultsTable
             results={results}
             apiUrl={process.env.NEXT_PUBLIC_API_URL || "https://a19f-202-131-110-138.ngrok-free.app"}
+            selectedUrls={selectedUrls}
+            onToggleSelect={toggleResult}
           />
         </div>
       )}

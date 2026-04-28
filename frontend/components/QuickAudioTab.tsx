@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 
 import Spinner from "./Spinner";
+import { shareContent, triggerDownload } from "@/lib/mobileActions";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -209,14 +210,15 @@ export default function QuickAudioTab() {
               <motion.a
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
-                href={downloadUrl}
                 className="primary-button"
-                download
-                onClick={() =>
+                href={downloadUrl}
+                onClick={(event) => {
+                  event.preventDefault();
                   window.dispatchEvent(
                     new CustomEvent("reeltunes-toast", { detail: { message: "Download started" } }),
-                  )
-                }
+                  );
+                  triggerDownload(downloadUrl, result.filename);
+                }}
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="M12 3v12" />
@@ -225,6 +227,32 @@ export default function QuickAudioTab() {
                 </svg>
                 Download MP3
               </motion.a>
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                className="secondary-button"
+                onClick={() => {
+                  void shareContent({
+                    title: result.filename || "ReelTunes audio",
+                    text: "Check out this extracted audio from ReelTunes",
+                    url: result.url,
+                  }).catch(() => {
+                    window.dispatchEvent(
+                      new CustomEvent("reeltunes-toast", { detail: { message: "Link copied for sharing" } }),
+                    );
+                  });
+                }}
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <circle cx="18" cy="5" r="2" />
+                  <circle cx="6" cy="12" r="2" />
+                  <circle cx="18" cy="19" r="2" />
+                  <path d="m8 12 8-5" />
+                  <path d="m8 12 8 7" />
+                </svg>
+                Share
+              </motion.button>
             </div>
           </motion.div>
         )}
