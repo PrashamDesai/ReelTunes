@@ -1,5 +1,5 @@
 export async function processUrl(mode: 'single' | 'collection', url: string) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://b140-202-131-110-138.ngrok-free.app";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://a19f-202-131-110-138.ngrok-free.app";
   const endpoint = mode === "single" ? "/process-single" : "/process-batch";
   const response = await fetch(`${API_URL}${endpoint}`, {
     method: "POST",

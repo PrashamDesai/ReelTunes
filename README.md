@@ -77,7 +77,7 @@ npm run dev
 Set `NEXT_PUBLIC_API_URL` in `.env.local` to your backend URL. For the deployed backend, use:
 
 ```bash
-NEXT_PUBLIC_API_URL=http://b140-202-131-110-138.ngrok-free.app
+NEXT_PUBLIC_API_URL=https://a19f-202-131-110-138.ngrok-free.app
 ```
 
 If you are not on Windows, replace `copy` with:

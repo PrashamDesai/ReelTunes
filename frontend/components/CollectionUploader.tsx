@@ -192,7 +192,7 @@ export default function CollectionUploader() {
         <div>
           <ResultsTable
             results={results}
-            apiUrl={process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}
+            apiUrl={process.env.NEXT_PUBLIC_API_URL || "https://a19f-202-131-110-138.ngrok-free.app"}
           />
         </div>
       )}
