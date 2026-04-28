@@ -1,8 +1,8 @@
 {
   "name": "ReelTunes",
   "short_name": "ReelTunes",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "https://reeltunes.onrender.com/",
+  "scope": "https://reeltunes.onrender.com/",
   "display": "standalone",
   "background_color": "#060816",
   "theme_color": "#060816",

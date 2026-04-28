@@ -4,8 +4,7 @@ import { useState } from "react";
 import ResultsTable, { type ResultItem } from "./ResultsTable";
 import { processUrl } from "@/lib/processUrl";
 
-const URL_PATTERN = /https?:\/\/[^
-"'<>\s]+/gi;
+const URL_PATTERN = /https?:\/\/[^"'<>\s]+/gi;
 
 export default function CollectionUploader() {
   const [results, setResults] = useState<ResultItem[]>([]);

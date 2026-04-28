@@ -32,7 +32,8 @@ function extractSharedUrl(formData: FormData) {
 }
 
 function redirectHome(request: Request, sharedUrl?: string) {
-  const destination = new URL("/", request.url);
+  const deployedUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : new URL("/", request.url).origin;
+  const destination = new URL("/?mode=song", deployedUrl);
   if (sharedUrl) {
     destination.searchParams.set("shared", sharedUrl);
   }
